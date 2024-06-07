@@ -1,0 +1,167 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// Run 'npx prisma format' to auto update and format your schema after you make changes
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int        @id @default(autoincrement())
+  fullName          String
+  email         String     @unique
+  password      String
+  recoveryToken String?
+  roles         UserRole[]
+  cpf           String?    @unique
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model Role {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  permissions Permission[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  UserRole    UserRole[]
+}
+
+model Permission {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  roles     Role[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserRole {
+  id     Int @id @default(autoincrement())
+  userId Int
+  roleId Int
+
+  user User @relation(fields: [userId], references: [id])
+  role Role @relation(fields: [roleId], references: [id])
+
+  @@unique([userId, roleId])
+}
+
+model Customer {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  phone     String
+  address   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Order     Order[]
+}
+
+model Product {
+  id                Int                 @id @default(autoincrement())
+  name              String
+  description       String?
+  price             Float
+  stock             Int                 @default(0)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  OrderItem         OrderItem[]
+  PurchaseOrderItem PurchaseOrderItem[]
+}
+
+model Order {
+  id         Int         @id @default(autoincrement())
+  customerId Int
+  total      Float
+  orderDate  DateTime    @default(now())
+  status     OrderStatus @default(PENDING)
+  orderItems OrderItem[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  customer Customer @relation(fields: [customerId], references: [id])
+}
+
+model OrderItem {
+  id        Int   @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  quantity  Int
+  price     Float
+
+  order   Order   @relation(fields: [orderId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@unique([orderId, productId])
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model Supplier {
+  id            Int             @id @default(autoincrement())
+  name          String
+  contactName   String
+  email         String          @unique
+  phone         String
+  address       String
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  PurchaseOrder PurchaseOrder[]
+}
+
+model PurchaseOrder {
+  id         Int                 @id @default(autoincrement())
+  supplierId Int
+  total      Float
+  orderDate  DateTime            @default(now())
+  status     OrderStatus         @default(PENDING)
+  orderItems PurchaseOrderItem[]
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+
+  supplier Supplier @relation(fields: [supplierId], references: [id])
+}
+
+model PurchaseOrderItem {
+  id              Int   @id @default(autoincrement())
+  purchaseOrderId Int
+  productId       Int
+  quantity        Int
+  price           Float
+
+  purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+  product       Product       @relation(fields: [productId], references: [id])
+
+  @@unique([purchaseOrderId, productId])
+}
+
+model MailTemplate {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  trigger   String   @unique
+  name      String
+  subject   String
+  body      String   @db.Text
+}
+
+model SystemSetting {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  name      String   @unique
+  value     Json?
+}
