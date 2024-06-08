@@ -5,10 +5,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Templating in NestJS with Handlebars/HTMX</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="htmx.min.js"></script>
-    <script src="tailwind-3.4.4.js"></script>
-    <script src="material-ui.production.min.js"></script>
+    
+    <link rel="stylesheet" href="../style.css">
+    <script src="../htmx.min.js"></script>
+    <script src="../tailwind-3.4.4.js"></script>
+    <script src="../material-ui.production.min.js"></script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -19,6 +21,15 @@
     rel="stylesheet"
     href="https://fonts.googleapis.com/icon?family=Material+Icons"
     />
+     <script>
+      if (localStorage.theme === 'dark' || !('theme' in localStorage)) {
+        document.querySelector('html').classList.add('dark');
+        document.querySelector('html').style.colorScheme = 'dark';
+      } else {
+        document.querySelector('html').classList.remove('dark');
+        document.querySelector('html').style.colorScheme = 'light';
+      }        
+    </script>  
 </head>
 <body>
     <header>
@@ -31,6 +42,6 @@
         {{{body}}}
     </div>
     {{!-- Footer Partial --}}
-    {{>footer}}
+    {{!-- {{>footer}} --}}
 </body>
 </html>
