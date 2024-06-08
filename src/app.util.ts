@@ -1,5 +1,7 @@
 import * as fs from 'fs';
 import { join } from 'path';
+import { ServerMode } from './app.types';
+import { Response } from 'express';
 
 /**
  * Get all views paths from modules
@@ -11,7 +13,11 @@ function getViewsPaths(): string[] {
     .readdirSync(join(__dirname, '..', 'src/'))
     .filter((file) => {
       const filePath = join(__dirname, '..', 'src/', file);
-      return fs.statSync(filePath).isDirectory() && file !== 'views';
+      return (
+        fs.statSync(filePath).isDirectory() &&
+        file !== 'views' &&
+        file !== 'api'
+      );
     });
   // Creates array of all "views" path inside modules
   const views = modules.map((module) => {
@@ -22,4 +28,17 @@ function getViewsPaths(): string[] {
   return views;
 }
 
-export { getViewsPaths };
+function serverModeResponse(
+  serverMode: ServerMode,
+  res: Response,
+  obj: any,
+  view?: string,
+) {
+  if (serverMode === 'ssr' && view) {
+    return res.render(view, obj);
+  } else {
+    return res.json(obj);
+  }
+}
+
+export { getViewsPaths, serverModeResponse };

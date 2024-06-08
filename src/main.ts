@@ -5,16 +5,13 @@ import * as hbs from 'express-handlebars';
 import { AppModule } from './app.module';
 import { getViewsPaths } from './app.util';
 import { ServerMode } from './app.types';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+// require('dotenv').config();
+export const serverMode: ServerMode =
+  (process.env.SERVER_MODE as ServerMode) || 'api';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-
-  const serverMode: ServerMode =
-    (process.env.SERVER_MODE as ServerMode) || 'api';
-
-  if (serverMode === 'api' || serverMode === 'full') {
-    app.setGlobalPrefix('api');
-  }
 
   if (serverMode === 'ssr' || serverMode === 'full') {
     app.engine(
@@ -29,8 +26,8 @@ async function bootstrap() {
     app.setViewEngine('hbs');
     app.useStaticAssets(join(__dirname, '..', 'public'));
     const views = getViewsPaths();
-    console.log('Loading views', views);
 
+    console.log('Loading views', views);
     app.setBaseViewsDir(views);
   }
 
